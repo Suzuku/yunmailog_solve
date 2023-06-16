@@ -7,7 +7,7 @@
 
 import sys
 from PyQt6 import QtCore
-from PyQt6.QtWidgets import QWidget,QLabel, QPushButton, QApplication,QFileDialog,QLineEdit
+from PyQt6.QtWidgets import QWidget,QLabel, QMessageBox,QPushButton, QApplication,QFileDialog,QLineEdit
 import pandas as pd
 import shutil
 import os
@@ -51,15 +51,23 @@ class Ui_Dialog(QWidget):
         self.pushButton_2.setText(_translate("Dialog", "运行"))
 
     def showDialog(self):
-
-        home_dir ='D:/ganweilun/ganweilun/西湖专案/4.26上午/452836359'
-        fname = QFileDialog.getExistingDirectory(self, '打开文件夹', home_dir)
+        fname = QFileDialog.getExistingDirectory(self, '打开文件夹')
         self.fname = fname
         if fname:
             self.lineEdit.setText(fname)
 
+    def show_success_message(self):
+        reply = QMessageBox.about(self, "成功", "运行成功！！")
+
+    def show_error_message(self):
+        QMessageBox.critical(self,"失败","请重启工具！！",QMessageBox.StandardButton.Yes,QMessageBox.StandardButton.Yes)
+
     def run(self):
-        solveFileDir(self.fname)
+        try:
+            solveFileDir(self.fname)
+            self.show_success_message()
+        except:
+            self.show_error_message()
             
 # 计算两个日期时间字符串间隔
 def calDateStrInterval(str1, str2):
@@ -108,11 +116,8 @@ def solveFileDir(pathTmp):
         shutil.rmtree('%s/登录日志清洗后' % pathTmp)
     os.makedirs('%s/登录日志清洗后' % pathTmp)
     files = [f for f in os.listdir(pathTmp) if os.path.isfile('%s/%s' % (pathTmp,f))]
-    print(os.listdir(pathTmp),files)
-
     for file in files:
         fileName = file.split('.')[0]
-        print(pathTmp,fileName)
         if fileName.find('登录日志同步') >= 0:
             cleanSingleFile(pathTmp,fileName)
     print('程序运行耗时：%s' % (time.time() - start_time))
